@@ -1,5 +1,6 @@
 import pygame
 import math
+import random
 
 # setup display
 pygame.init()
@@ -22,6 +23,7 @@ for i in range(26):
 # fonts
 LETTER_FONT = pygame.font.SysFont('comicsans', 40)
 WORD_FONT = pygame.font.SysFont('comicsans', 60)
+TITLE_FONT = pygame.font.SysFont('comicsans', 80)
 
 
 # load images
@@ -32,8 +34,9 @@ for i in range(7):
 
 # game variables
 hangmam_status = 0
-word = 'DEVELOPER'
-guess = []
+words = ['PYTHON', 'IDE', 'PYGAME']
+word = random.choice(words)
+guessed = []
 
 # colors
 WHITE = (255, 255, 255)
@@ -46,11 +49,14 @@ run = True
 
 def draw():
     win.fill(WHITE)
+    # draw title
+    text = TITLE_FONT.render('DEVELOPER HANGMAN', 1, BLACK)
+    win.blit(text, (WIDTH/2 - text.get_width()/2, 20 ))
 
     # draw word
     display_word = ""
     for letter in word:
-        if letter in guess:
+        if letter in guessed:
             display_word += letter + " "
         else:
             display_word += "_ "
@@ -68,11 +74,16 @@ def draw():
     win.blit(images[hangmam_status], (150, 100))
     pygame.display.update()
 
-
+def display_massage(massage):
+    pygame.time.delay(2000)
+    win.fill(WHITE)
+    text = WORD_FONT.render(massage, 1, BLACK)
+    win.blit(text, (WIDTH/2 - text.get_width()/2, HEIGHT/2 - text.get_height()/2))
+    pygame.display.update()
+    pygame.time.delay(3000)
+        
 while run:
     clock.tick(FPS)
-
-    draw()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -85,5 +96,23 @@ while run:
                     dis = math.sqrt((x - m_x)**2 + (y - m_y)**2)
                     if dis < RADIUS:
                         letter[3] = False
+                        guessed.append(ltr)
+                        if ltr not in word:
+                            hangmam_status += 1
+    
+    draw()
+
+    won = True
+    for letter in word:
+        if letter not in guessed:
+            won = False
+
+    if won:
+        display_massage('You Won!')
+        break
+
+    if hangmam_status == 6:
+        display_massage('You Lost!')
+        break
 
 pygame.quit()
